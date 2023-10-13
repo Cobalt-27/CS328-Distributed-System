@@ -53,10 +53,7 @@ for exp in $(seq 1 $n); do
         echo "| $np_space | $distributed_space | $bf_space |"
         echo "-----------------------------"
         
-        # If it's the first run, log the results
-        if [ "$exp" -eq 1 ]; then
-            echo "$np $distributed_time $bf_time" >> $output_file
-        fi
+        echo "$np $distributed_time $bf_time" >> $output_file
 
         sleep 0.2
     done
