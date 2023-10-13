@@ -6,16 +6,24 @@ mpic++ matmul.cpp -o matmul.out
 # Output file
 output_file="test_results.log"
 
-# Argument parsing for number of experiments
+# Argument parsing for number of experiments and cluster mode
 n=1
-while getopts ":n:" opt; do
+cluster=false
+
+while getopts ":n:c" opt; do
   case $opt in
-    n) n="$OPTARG"
-    ;;
-    \?) echo "Invalid option -$OPTARG" >&2
-    ;;
+    n) n="$OPTARG";;
+    c) cluster=true;;
+    \?) echo "Invalid option -$OPTARG" >&2;;
   esac
 done
+
+if $cluster; then
+    echo "Running in CLUSTER mode"
+else
+    echo "Running in LOCAL mode"
+fi
+echo "Number of experiments: $n"
 
 # Clean the output file
 > $output_file
@@ -31,7 +39,12 @@ for exp in $(seq 1 $n); do
 
     # Run tests for np = 1, 2, 4, ..., 32
     for np in 1 2 4 8 16 32; do
-        result=$(mpirun -np $np --oversubscribe ./matmul.out 2>&1)
+        if $cluster; then
+            mpi_command="mpirun -np $np --oversubscribe --allow-run-as-root --host localhost,nodeB ./matmul.out"
+        else
+            mpi_command="mpirun -np $np --oversubscribe --allow-run-as-root ./matmul.out"
+        fi
+        result=$($mpi_command 2>&1)
         np_space=$(printf "%-4s" $np)
         distributed_time=$(echo $result | awk '{print $2}')
         bf_time=$(echo $result | awk '{print $3}')
