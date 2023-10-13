@@ -1,12 +1,9 @@
 #!/bin/bash
 
-# Compile the code
 mpic++ matmul.cpp -o matmul.out
 
-# Output file
 output_file="test_results.log"
 
-# Argument parsing for number of experiments and cluster mode
 n=1
 cluster=false
 
@@ -25,19 +22,15 @@ else
 fi
 echo "Number of experiments: $n"
 
-# Clean the output file
 > $output_file
 
-# Run the entire experiment for n times
 for exp in $(seq 1 $n); do
     echo "Experiment run: $exp"
     
-    # Print table header for console output
     echo "-----------------------------"
     echo "| np  | Distributed |   BF   |"
     echo "-----------------------------"
 
-    # Run tests for np = 1, 2, 4, ..., 32
     for np in 1 2 4 8 16 32; do
         if $cluster; then
             mpi_command="mpirun -np $np --oversubscribe --allow-run-as-root --host localhost,nodeB ./matmul.out"
