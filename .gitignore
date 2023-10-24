@@ -1,3 +1,10 @@
+/protoc
+__pycache__/
+target/
+
+*.class
+
+
 *.log
 # Prerequisites
 *.d
