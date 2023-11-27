@@ -43,6 +43,7 @@ public class Skeleton extends Thread {
          *  */
 
         try (ServerSocket serverSocket = new ServerSocket(port, BACKLOG, InetAddress.getByName(host))) {
+            port=serverSocket.getLocalPort();
             System.out.println("Skeleton running on port " + port);
 
             while (!Thread.interrupted()) {

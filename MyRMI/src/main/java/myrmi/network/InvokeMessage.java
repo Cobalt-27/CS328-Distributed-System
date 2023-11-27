@@ -1,6 +1,8 @@
 package myrmi.network;
 
-public class InvokeMessage {
+import java.io.Serializable;
+
+public class InvokeMessage implements Serializable{
     private int objectKey;
     private String methodName;
     private Class<?>[] parameterTypes;

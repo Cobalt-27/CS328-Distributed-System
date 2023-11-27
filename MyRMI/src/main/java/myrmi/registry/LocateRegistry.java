@@ -2,12 +2,14 @@ package myrmi.registry;
 
 import myrmi.Remote;
 import myrmi.exception.RemoteException;
-
+import myrmi.server.RemoteObjectRef;
+import myrmi.server.StubInvocationHandler;
+import myrmi.server.Util;
 import java.lang.reflect.Proxy;
 
 public class LocateRegistry {
     public static Registry getRegistry() {
-        return getRegistry("127.0.0.1", Registry.REGISTRY_PORT);
+        return getRegistry("localhost", Registry.REGISTRY_PORT);
     }
 
     /**
@@ -24,7 +26,7 @@ public class LocateRegistry {
                 host = "";
             }
         }
-        Remote stub = (Remote) Proxy.newProxyInstance(Registry.class.getClassLoader(), new Class<?>[]{Registry.class}, new RegistryStubInvocationHandler(host, port));
+        Remote stub = (Remote) Util.createStub(new RemoteObjectRef(host, port, 0, Registry.class.getName()));
 
         return (Registry) stub;
     }
@@ -42,7 +44,7 @@ public class LocateRegistry {
         if (port == 0) {
             port = Registry.REGISTRY_PORT;
         }
-        Registry registry = new RegistryImpl(port);
-        return (Registry) Proxy.newProxyInstance(Registry.class.getClassLoader(), new Class<?>[]{Registry.class}, new RegistryStubInvocationHandler("127.0.0.1", port));
+        return new RegistryImpl(port);
+        // return (Registry) Proxy.newProxyInstance(Registry.class.getClassLoader(), new Class<?>[]{Registry.class}, new RegistryStubInvocationHandler("127.0.0.1", port));
     }
 }
