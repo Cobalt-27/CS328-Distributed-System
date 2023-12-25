@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  registry:
+    image: myrmi:latest
+    environment:
+      - RMI_ROLE=registry
+      - RMI_REGISTRY_ADDRESS=registry  # Uses the service name as DNS
+      - RMI_SERVER_ADDRESS=server
+    ports:
+      - "11099:11099"
+    networks:
+      - rmi-network
+
+  server:
+    image: myrmi:latest
+    environment:
+      - RMI_ROLE=server
+      - RMI_REGISTRY_ADDRESS=registry
+      - RMI_SERVER_ADDRESS=server
+    depends_on:
+      - registry
+    ports:
+      - "8000:9000"
+    networks:
+      - rmi-network
+
+  client:
+    image: myrmi:latest
+    environment:
+      - RMI_ROLE=client
+      - RMI_REGISTRY_ADDRESS=registry
+      - RMI_SERVER_ADDRESS=server
+    depends_on:
+      - server
+    networks:
+      - rmi-network
+
+networks:
+  rmi-network:
+    driver: bridge

@@ -3,14 +3,15 @@ package myrmi.server;
 import myrmi.Remote;
 import myrmi.server.RemoteObjectRef;
 import myrmi.exception.RemoteException;
+import myrmi.registry.Registry;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class UnicastRemoteObject implements Remote, java.io.Serializable {
     int port;
 
-    public static Remote exportObject(Remote obj, int port) throws RemoteException {
+    public static Remote exportObject(Remote obj, String addr, int port) throws RemoteException {
         return exportObject(obj,
-                new RemoteObjectRef("localhost", port, obj.hashCode(), obj.getClass().getInterfaces()[0].getName()));
+                new RemoteObjectRef(addr, port, obj.hashCode(), obj.getClass().getInterfaces()[0].getName()));
     }
 
     /**

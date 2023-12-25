@@ -8,6 +8,8 @@ import myrmi.exception.NotBoundException;
 import java.util.HashMap;
 
 public interface Registry extends Remote {
+    static String ADDRESS = System.getenv("RMI_REGISTRY_ADDRESS") != null ? System.getenv("RMI_REGISTRY_ADDRESS") : "localhost";
+    static String SERVER_ADDRESS = System.getenv("RMI_SERVER_ADDRESS") != null ? System.getenv("RMI_SERVER_ADDRESS") : "localhost";
     int REGISTRY_PORT = 11099;
     HashMap<String, Remote> bindings = new HashMap<>();
     //returns the proxy

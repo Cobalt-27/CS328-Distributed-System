@@ -9,7 +9,7 @@ import java.lang.reflect.Proxy;
 
 public class LocateRegistry {
     public static Registry getRegistry() {
-        return getRegistry("localhost", Registry.REGISTRY_PORT);
+        return getRegistry(Registry.ADDRESS, Registry.REGISTRY_PORT);
     }
 
     /**
@@ -45,6 +45,5 @@ public class LocateRegistry {
             port = Registry.REGISTRY_PORT;
         }
         return new RegistryImpl(port);
-        // return (Registry) Proxy.newProxyInstance(Registry.class.getClassLoader(), new Class<?>[]{Registry.class}, new RegistryStubInvocationHandler("127.0.0.1", port));
     }
 }

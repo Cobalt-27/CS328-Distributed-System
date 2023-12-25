@@ -1,5 +1,7 @@
 package myrmi.tests;
 
+import java.util.Scanner;
+
 import myrmi.Remote;
 import myrmi.server.*;
 import myrmi.registry.*;
@@ -44,7 +46,9 @@ public class RMITest {
     // Internal Remote Interface for Counter Service
     public interface CounterService extends Remote {
         void increment() throws RemoteException;
+
         void decrement() throws RemoteException;
+
         int getCount() throws RemoteException;
     }
 
@@ -72,11 +76,8 @@ public class RMITest {
         }
     }
 
-     // Test for Simple Remote Invocation
-     private static void testSimpleRemoteInvocation(Registry registry) throws Exception {
-        RemoteInterface1 remoteObj = new RemoteObject1();
-        Remote stub = UnicastRemoteObject.exportObject(remoteObj, 0);
-        registry.bind("Object1", stub);
+    // Test for Simple Remote Invocation
+    private static void testSimpleRemoteInvocation(Registry registry) throws Exception {
 
         RemoteInterface1 clientStub = (RemoteInterface1) registry.lookup("Object1");
         String response = clientStub.getMessage();
@@ -87,36 +88,34 @@ public class RMITest {
         }
     }
 
-    // Test for Rebinding
-    private static void testRebinding(Registry registry) throws Exception {
-        RemoteInterface1 newRemoteObj = new RemoteObject1();
-        Remote newStub = UnicastRemoteObject.exportObject(newRemoteObj, 0);
-        registry.rebind("Object1", newStub);
+    // // Test for Rebinding
+    // private static void testRebinding(Registry registry) throws Exception {
+    // RemoteInterface1 newRemoteObj = new RemoteObject1();
+    // Remote newStub = UnicastRemoteObject.exportObject(newRemoteObj,
+    // Registry.SERVER_ADDRESS, 0);
+    // registry.rebind("Object1", newStub);
 
-        RemoteInterface1 clientStub = (RemoteInterface1) registry.lookup("Object1");
-        String response = clientStub.getMessage();
-        if ("Hello from Object 1".equals(response)) {
-            System.out.println("Test Rebinding PASS");
-        } else {
-            System.out.println("Test Rebinding FAILED: Received - " + response);
-        }
-    }
+    // RemoteInterface1 clientStub = (RemoteInterface1) registry.lookup("Object1");
+    // String response = clientStub.getMessage();
+    // if ("Hello from Object 1".equals(response)) {
+    // System.out.println("Test Rebinding PASS");
+    // } else {
+    // System.out.println("Test Rebinding FAILED: Received - " + response);
+    // }
+    // }
 
-    // Test for Unbinding
-    private static void testUnbinding(Registry registry) throws Exception {
-        registry.unbind("Object1");
-        try {
-            RemoteInterface1 clientStub = (RemoteInterface1) registry.lookup("Object1");
-            System.out.println("Test Unbinding FAILED: Lookup should have failed");
-        } catch (Exception e) {
-            System.out.println("Test Unbinding PASS");
-        }
-    }
+    // // Test for Unbinding
+    // private static void testUnbinding(Registry registry) throws Exception {
+    // registry.unbind("Object1");
+    // try {
+    // RemoteInterface1 clientStub = (RemoteInterface1) registry.lookup("Object1");
+    // System.out.println("Test Unbinding FAILED: Lookup should have failed");
+    // } catch (Exception e) {
+    // System.out.println("Test Unbinding PASS");
+    // }
+    // }
 
     private static void testAnotherSimpleRemoteInvocation(Registry registry) throws Exception {
-        RemoteInterface2 remoteObj2 = new RemoteObject2();
-        Remote serverStub = UnicastRemoteObject.exportObject(remoteObj2, 0);
-        registry.bind("Object2", serverStub);
 
         RemoteInterface2 stub = (RemoteInterface2) registry.lookup("Object2");
         if ("Hello from Object 2".equals(stub.getResponse())) {
@@ -127,9 +126,6 @@ public class RMITest {
     }
 
     private static void testCounterService(Registry registry) throws Exception {
-        CounterService counterService = new RemoteCounterService();
-        Remote counterStub = UnicastRemoteObject.exportObject(counterService, 0);
-        registry.bind("CounterService", counterStub);
 
         CounterService stub = (CounterService) registry.lookup("CounterService");
 
@@ -145,29 +141,88 @@ public class RMITest {
         }
     }
 
+    private static void waitForStop() {
+        // Scanner scanner = new Scanner(System.in);
+        // scanner.nextLine();
+        // scanner.close();
+        try {
+            while (true) {
+
+                Thread.sleep(100); // Sleep for 1 second
+
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void setupObjects(Registry registry) throws Exception {
+        RemoteInterface1 remoteObj = new RemoteObject1();
+        Remote stub = UnicastRemoteObject.exportObject(remoteObj, Registry.SERVER_ADDRESS, 8001);
+        registry.bind("Object1", stub);
+
+        RemoteInterface2 remoteObj2 = new RemoteObject2();
+        Remote stub2 = UnicastRemoteObject.exportObject(remoteObj2, Registry.SERVER_ADDRESS, 8002);
+        registry.bind("Object2", stub2);
+
+        CounterService counterService = new RemoteCounterService();
+        Remote counterStub = UnicastRemoteObject.exportObject(counterService, Registry.SERVER_ADDRESS, 8003);
+        registry.bind("CounterService", counterStub);
+    }
+
     public static void main(String[] args) {
         try {
+            // int port=0;
+
             // Initialize registry
-            Registry registry = LocateRegistry.createRegistry(0);
+            int role = -1;
+            if (args.length > 0) {
+                role = Integer.parseInt(args[0]);
+            }
+            int roleRegistry = 0;
+            int roleServer = 1;
+            int roleClient = 2;
+            Registry registry;
+            if (role == roleRegistry) {
+                System.out.println("Starting registry");
+                registry = LocateRegistry.createRegistry();
+                waitForStop();
+                System.exit(0);
+            } else if (role == roleServer) {
+                Thread.sleep(1000);
+                System.out.println("Starting server");
+                registry = LocateRegistry.getRegistry();
+                setupObjects(registry);
+                waitForStop();
+                System.exit(0);
+            } else if (role == roleClient) {
+                System.out.println("Starting client");
+                Thread.sleep(2000);
+                registry = LocateRegistry.getRegistry();
 
-            testSimpleRemoteInvocation(registry);
-            Thread.sleep(1000); // Sleep between tests
+                testSimpleRemoteInvocation(registry);
+                Thread.sleep(1000); // Sleep between tests
 
-            // Test Remote Object 2
-            testAnotherSimpleRemoteInvocation(registry);
-            Thread.sleep(1000);
+                // Test Remote Object 2
+                testAnotherSimpleRemoteInvocation(registry);
+                Thread.sleep(1000);
 
-            testRebinding(registry);
-            Thread.sleep(1000); // Sleep between tests
+                // testRebinding(registry);
+                // Thread.sleep(1000); // Sleep between tests
 
-            testUnbinding(registry);
-            Thread.sleep(1000); // Sleep between tests
+                // testUnbinding(registry);
+                // Thread.sleep(1000); // Sleep between tests
 
-            // Test Counter Service
-            testCounterService(registry);
-
-            // Exit the program
-            System.exit(0);
+                // Test Counter Service
+                testCounterService(registry);
+                // Exit the program
+                System.exit(0);
+            } else {
+                System.out.println("Invalid role");
+                System.exit(0);
+            }
+        } catch (NumberFormatException e) {
+            System.err.println("Role must be an integer");
         } catch (Exception e) {
             e.printStackTrace();
         }
