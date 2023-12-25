@@ -25,4 +25,6 @@ EXPOSE 11099
 RUN cd /rmi && mvn clean compile
 
 # Define entrypoint to run the script with the environment variable
-ENTRYPOINT ./run.sh $RMI_ROLE
+ENTRYPOINT ./run.sh server
+#ENTRYPOINT ./run.sh client
+#ENTRYPOINT ./run.sh registry

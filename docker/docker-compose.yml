@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   registry:
-    image: myrmi:latest
+    image: myrmi-reg:latest
     environment:
       - RMI_ROLE=registry
       - RMI_REGISTRY_ADDRESS=registry  # Uses the service name as DNS
@@ -13,7 +13,7 @@ services:
       - rmi-network
 
   server:
-    image: myrmi:latest
+    image: myrmi-ser:latest
     environment:
       - RMI_ROLE=server
       - RMI_REGISTRY_ADDRESS=registry
@@ -26,7 +26,7 @@ services:
       - rmi-network
 
   client:
-    image: myrmi:latest
+    image: myrmi-cli:latest
     environment:
       - RMI_ROLE=client
       - RMI_REGISTRY_ADDRESS=registry
