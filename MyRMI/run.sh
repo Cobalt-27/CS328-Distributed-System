@@ -20,5 +20,8 @@ case $1 in
         ;;
 esac
 
+#sleep for 1s
+
+
 # Run the application with the specified role
 java -cp target/classes myrmi.tests.RMITest $role
